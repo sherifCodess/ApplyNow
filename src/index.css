@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-paper text-ink font-body antialiased;
+  background-image: radial-gradient(circle at 1px 1px, rgba(20, 33, 61, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+::selection {
+  background-color: #dbc478;
+  color: #14213d;
+}
+
+*:focus-visible {
+  outline: 2px solid #14213d;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.perforated {
+  background-image: radial-gradient(circle, #faf6ec 3px, transparent 3.5px);
+  background-size: 14px 14px;
+  background-position: left center;
+}
