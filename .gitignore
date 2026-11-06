@@ -3,3 +3,9 @@ dist/
 .env
 .env.*
 !.env.example
+# Backend build output and generated Prisma client
+dist-server/
+backend/src/generated/
+
+# Test coverage
+coverage/
