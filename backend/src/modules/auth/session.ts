@@ -28,3 +28,15 @@ export const createSession = async (userId: string) => {
     expiresAt,
   };
 };
+
+export const revokeSession = async (sessionId: string): Promise<void> => {
+  await prisma.session.updateMany({
+    where: {
+      id: sessionId,
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
+};

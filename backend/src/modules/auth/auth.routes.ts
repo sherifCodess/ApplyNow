@@ -5,6 +5,8 @@ import { registrationSchema } from "./registration-schema.js";
 import { registerStudent } from "./registration.js";
 import { loginSchema } from "./login-schema.js";
 import { loginStudent, InvalidCredentialsError } from "./login.js";
+import { requireAuthentication } from "./auth.middleware.js";
+import { revokeSession } from "./session.js";
 
 const authRouter = Router();
 
@@ -81,5 +83,60 @@ authRouter.post(
     }
   },
 );
+
+authRouter.get("/me", requireAuthentication, (req, res) => {
+  const user = req.authenticatedUser;
+
+  if (!user) {
+    res.status(401).json({
+      success: false,
+      message: "Authentication required.",
+      data: null,
+    });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Authenticated user retrieved.",
+    data: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+  });
+});
+
+authRouter.post("/logout", requireAuthentication, async (req, res, next) => {
+  const user = req.authenticatedUser;
+
+  if (!user) {
+    res.status(401).json({
+      success: false,
+      message: "Authentication required.",
+      data: null,
+    });
+    return;
+  }
+
+  try {
+    await revokeSession(user.sessionId);
+
+    res.clearCookie("applynow.sid", {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successful.",
+      data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default authRouter;
