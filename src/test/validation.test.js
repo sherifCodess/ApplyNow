@@ -82,7 +82,7 @@ describe("validateAcademic", () => {
     it("accepts valid academic information", () => {
         const data = {
             previousSchool: "University of Lagos",
-            qualification: "BSc",
+            qualification: "WAEC / SSCE",
             graduationYear: "2024",
             gpa: "4.2",
             programme: "Computer Science",
@@ -96,7 +96,7 @@ describe("validateAcademic", () => {
     it("rejects an invalid graduation year", () => {
         const data = {
             previousSchool: "University of Lagos",
-            qualification: "BSc",
+            qualification: "WAEC / SSCE",
             graduationYear: "1970",
             gpa: "4.2",
             programme: "Computer Science",
@@ -112,7 +112,7 @@ describe("validateAcademic", () => {
     it("rejects a GPA outside the allowed range", () => {
         const data = {
             previousSchool: "University of Lagos",
-            qualification: "BSc",
+            qualification: "WAEC / SSCE",
             graduationYear: "2024",
             gpa: "6",
             programme: "Computer Science",
@@ -140,7 +140,7 @@ describe("validateGuardian", () => {
     it("accepts valid guardian information", () => {
         const data = {
             guardianName: "Ahmed Abdulazeez",
-            relationship: "Father",
+            relationship: "Parent",
             guardianPhone: "+2348012345678",
             guardianEmail: "ahmed@example.com",
             guardianAddress: "Lagos, Nigeria",
@@ -154,7 +154,7 @@ describe("validateGuardian", () => {
     it("rejects an invalid guardian email", () => {
         const data = {
             guardianName: "Ahmed Abdulazeez",
-            relationship: "Father",
+            relationship: "Parent",
             guardianPhone: "+2348012345678",
             guardianEmail: "wrong-email",
             guardianAddress: "Lagos, Nigeria",

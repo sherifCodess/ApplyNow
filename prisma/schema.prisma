@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../backend/src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  ADMISSIONS_ADMIN
+  SUPER_ADMIN
+}
+
+enum ApplicationStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @db.VarChar(254)
+  emailNormalized String    @unique @db.VarChar(254)
+  passwordHash    String    @db.VarChar(255)
+  role            Role      @default(STUDENT)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions Session[]
+  applications Application[]
+  emailVerificationToken EmailVerificationToken?
+
+  @@index([role])
+}
+
+model Session {
+  id             String    @id @default(uuid()) @db.Uuid
+  tokenHash      String    @unique @db.Char(64)
+  userId         String    @db.Uuid
+  expiresAt      DateTime
+  lastActivityAt DateTime  @default(now())
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String    @unique @db.Char(64)
+  userId    String    @unique @db.Uuid
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model Application {
+  id          String            @id @default(uuid()) @db.Uuid
+  studentId   String            @db.Uuid
+  personal    Json
+  academic    Json
+  guardian    Json
+  status      ApplicationStatus @default(Pending)
+  submittedAt DateTime          @default(now())
+  reviewedAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, submittedAt])
+  @@index([status, submittedAt])
+}

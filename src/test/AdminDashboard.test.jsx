@@ -92,7 +92,13 @@ describe("AdminDashboard", () => {
   });
 
   it("filters applications by Pending status", async () => {
-    getApplications.mockResolvedValue(applications);
+    getApplications.mockImplementation(async (status = "All") => {
+      if (status === "All") return applications;
+
+      return applications.filter(
+        (application) => application.status === status,
+      );
+    });
 
     const user = userEvent.setup();
 
@@ -102,13 +108,27 @@ describe("AdminDashboard", () => {
 
     await user.click(screen.getByRole("button", { name: "Pending" }));
 
+    await waitFor(() => {
+      expect(getApplications).toHaveBeenLastCalledWith("Pending");
+    });
+
+    expect(await screen.findByText("Ahmed Abdul")).toBeInTheDocument();
+    expect(screen.queryByText("Fatima Ibrahim")).not.toBeInTheDocument();
+    expect(screen.queryByText("Yusuf Musa")).not.toBeInTheDocument();
+
     expect(screen.getByText("Ahmed Abdul")).toBeInTheDocument();
     expect(screen.queryByText("Fatima Ibrahim")).not.toBeInTheDocument();
     expect(screen.queryByText("Yusuf Musa")).not.toBeInTheDocument();
   });
 
   it("filters applications by Approved status", async () => {
-    getApplications.mockResolvedValue(applications);
+    getApplications.mockImplementation(async (status = "All") => {
+      if (status === "All") return applications;
+
+      return applications.filter(
+        (application) => application.status === status,
+      );
+    });
 
     const user = userEvent.setup();
 
@@ -118,13 +138,22 @@ describe("AdminDashboard", () => {
 
     await user.click(screen.getByRole("button", { name: "Approved" }));
 
-    expect(screen.getByText("Fatima Ibrahim")).toBeInTheDocument();
-    expect(screen.queryByText("Ahmed Abdul")).not.toBeInTheDocument();
-    expect(screen.queryByText("Yusuf Musa")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(getApplications).toHaveBeenLastCalledWith("Approved");
+      expect(screen.getByText("Fatima Ibrahim")).toBeInTheDocument();
+      expect(screen.queryByText("Ahmed Abdul")).not.toBeInTheDocument();
+      expect(screen.queryByText("Yusuf Musa")).not.toBeInTheDocument();
+    });
   });
 
   it("filters applications by Rejected status", async () => {
-    getApplications.mockResolvedValue(applications);
+    getApplications.mockImplementation(async (status = "All") => {
+      if (status === "All") return applications;
+
+      return applications.filter(
+        (application) => application.status === status,
+      );
+    });
 
     const user = userEvent.setup();
 
@@ -134,9 +163,12 @@ describe("AdminDashboard", () => {
 
     await user.click(screen.getByRole("button", { name: "Rejected" }));
 
-    expect(screen.getByText("Yusuf Musa")).toBeInTheDocument();
-    expect(screen.queryByText("Ahmed Abdul")).not.toBeInTheDocument();
-    expect(screen.queryByText("Fatima Ibrahim")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(getApplications).toHaveBeenLastCalledWith("Rejected");
+      expect(screen.getByText("Yusuf Musa")).toBeInTheDocument();
+      expect(screen.queryByText("Ahmed Abdul")).not.toBeInTheDocument();
+      expect(screen.queryByText("Fatima Ibrahim")).not.toBeInTheDocument();
+    });
   });
 
   it("displays an error when applications cannot be fetched", async () => {

@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge.jsx";
 import Button from "../components/Button.jsx";
 import { Loader, ErrorBanner } from "../components/Feedback.jsx";
-import { getApplicationById, updateApplicationStatus } from "../services/api.js";
+import {
+  getApplicationById,
+  updateApplicationStatus,
+} from "../services/api.js";
 
 function Field({ label, value }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-navy-800/45">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-navy-800/45">
+        {label}
+      </p>
       <p className="mt-0.5 text-sm text-navy-800">{value || "—"}</p>
     </div>
   );
@@ -23,9 +28,10 @@ function ApplicationDetails() {
   const [actionError, setActionError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  async function loadApplication() {
+  const loadApplication = useCallback(async () => {
     setLoading(true);
     setError("");
+
     try {
       const data = await getApplicationById(id);
       setApplication(data);
@@ -34,12 +40,11 @@ function ApplicationDetails() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     loadApplication();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [loadApplication]);
 
   async function handleDecision(status) {
     setActionLoading(true);
@@ -83,7 +88,7 @@ function ApplicationDetails() {
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-widest text-navy-800/45">
-            APP-{String(application.id).padStart(3, "0")}
+            Application ID: {application.id}
           </p>
           <h1 className="mt-1 font-display text-3xl font-semibold text-navy-800">
             {personal?.firstName} {personal?.lastName}
@@ -95,7 +100,9 @@ function ApplicationDetails() {
       <ErrorBanner message={actionError} />
 
       <section className="mt-8 rounded-lg border border-navy-800/10 bg-white/60 p-6 shadow-stub">
-        <h2 className="font-display text-lg text-navy-800">Personal Information</h2>
+        <h2 className="font-display text-lg text-navy-800">
+          Personal Information
+        </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Email" value={personal?.email} />
           <Field label="Phone" value={personal?.phone} />
@@ -108,7 +115,9 @@ function ApplicationDetails() {
       </section>
 
       <section className="mt-6 rounded-lg border border-navy-800/10 bg-white/60 p-6 shadow-stub">
-        <h2 className="font-display text-lg text-navy-800">Academic Information</h2>
+        <h2 className="font-display text-lg text-navy-800">
+          Academic Information
+        </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Previous School" value={academic?.previousSchool} />
           <Field label="Qualification" value={academic?.qualification} />
@@ -119,7 +128,9 @@ function ApplicationDetails() {
       </section>
 
       <section className="mt-6 rounded-lg border border-navy-800/10 bg-white/60 p-6 shadow-stub">
-        <h2 className="font-display text-lg text-navy-800">Guardian Information</h2>
+        <h2 className="font-display text-lg text-navy-800">
+          Guardian Information
+        </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Name" value={guardian?.guardianName} />
           <Field label="Relationship" value={guardian?.relationship} />
@@ -135,14 +146,14 @@ function ApplicationDetails() {
         <Button
           variant="danger"
           onClick={() => handleDecision("Rejected")}
-          disabled={actionLoading || application.status === "Rejected"}
+          disabled={actionLoading || application.status !== "Pending"}
         >
           Reject
         </Button>
         <Button
           variant="gold"
           onClick={() => handleDecision("Approved")}
-          disabled={actionLoading || application.status === "Approved"}
+          disabled={actionLoading || application.status !== "Pending"}
         >
           Approve
         </Button>

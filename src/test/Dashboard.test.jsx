@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Dashboard from "../pages/Dashboard.jsx";
 import { ApplicationProvider } from "../context/ApplicationContext.jsx";
 import * as api from "../services/api.js";
 
 vi.mock("../services/api.js", () => ({
-  getApplicationById: vi.fn(),
+  getMyApplication: vi.fn(),
 }));
 
 function renderDashboard() {
@@ -22,13 +22,10 @@ function renderDashboard() {
 describe("Dashboard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.localStorage.clear();
   });
 
   it("shows the loading state initially", () => {
-    window.localStorage.setItem("applynow_last_application_id", "123");
-
-    api.getApplicationById.mockReturnValue(new Promise(() => {}));
+    api.getMyApplication.mockReturnValue(new Promise(() => {}));
 
     renderDashboard();
 
@@ -38,6 +35,8 @@ describe("Dashboard", () => {
   });
 
   it("shows the empty state when there is no application", async () => {
+    api.getMyApplication.mockResolvedValue(null);
+
     renderDashboard();
 
     expect(
@@ -49,11 +48,9 @@ describe("Dashboard", () => {
     ).toHaveAttribute("href", "/apply");
   });
 
-  it("fetches and displays an application", async () => {
-    window.localStorage.setItem("applynow_last_application_id", "123");
-
-    api.getApplicationById.mockResolvedValue({
-      id: 123,
+  it("fetches and displays the student's application", async () => {
+    const application = {
+      id: "550e8400-e29b-41d4-a716-446655440000",
       status: "Pending",
       personal: {
         firstName: "Sherif",
@@ -63,7 +60,9 @@ describe("Dashboard", () => {
         programme: "Computer Science",
       },
       submittedAt: "2026-08-13T10:00:00.000Z",
-    });
+    };
+
+    api.getMyApplication.mockResolvedValue(application);
 
     renderDashboard();
 
@@ -71,9 +70,8 @@ describe("Dashboard", () => {
       await screen.findByText("Track your application"),
     ).toBeInTheDocument();
 
-    expect(api.getApplicationById).toHaveBeenCalledWith("123");
-
-    expect(screen.getByText("APP-123")).toBeInTheDocument();
+    expect(api.getMyApplication).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(application.id)).toBeInTheDocument();
     expect(screen.getByText("Sherif Abdulazeez")).toBeInTheDocument();
     expect(
       screen.getByText("Applying for Computer Science"),
@@ -81,10 +79,8 @@ describe("Dashboard", () => {
   });
 
   it("displays the application's status", async () => {
-    window.localStorage.setItem("applynow_last_application_id", "456");
-
-    api.getApplicationById.mockResolvedValue({
-      id: 456,
+    api.getMyApplication.mockResolvedValue({
+      id: "550e8400-e29b-41d4-a716-446655440001",
       status: "Approved",
       personal: {
         firstName: "Sherif",
@@ -101,10 +97,8 @@ describe("Dashboard", () => {
   });
 
   it("displays the correct message for an approved application", async () => {
-    window.localStorage.setItem("applynow_last_application_id", "789");
-
-    api.getApplicationById.mockResolvedValue({
-      id: 789,
+    api.getMyApplication.mockResolvedValue({
+      id: "550e8400-e29b-41d4-a716-446655440002",
       status: "Approved",
       personal: {
         firstName: "Sherif",
@@ -125,9 +119,7 @@ describe("Dashboard", () => {
   });
 
   it("displays an error when the application cannot be fetched", async () => {
-    window.localStorage.setItem("applynow_last_application_id", "999");
-
-    api.getApplicationById.mockRejectedValue(
+    api.getMyApplication.mockRejectedValue(
       new Error("Failed to fetch application"),
     );
 

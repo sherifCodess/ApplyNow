@@ -417,14 +417,14 @@ it("submits a complete application successfully", async () => {
         guardianName: "Ahmed Abdulazeez",
         relationship: "Parent",
       }),
-      status: "Pending",
     }),
   );
 
   // Verify the application ID was saved
-  expect(window.localStorage.getItem("applynow_last_application_id")).toBe(
-    "app-123",
-  );
+  const submittedPayload = createApplication.mock.calls[0][0];
+
+  expect(submittedPayload).not.toHaveProperty("status");
+  expect(submittedPayload).not.toHaveProperty("submittedAt");
 });
 
 it("redirects to the confirmation page after successful submission", async () => {

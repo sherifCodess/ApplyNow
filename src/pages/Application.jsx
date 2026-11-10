@@ -24,8 +24,13 @@ const DESCRIPTIONS = {
 
 function Application() {
   const navigate = useNavigate();
-  const { formData, updateSection, currentStep, setCurrentStep, setLastSubmission } =
-    useApplication();
+  const {
+    formData,
+    updateSection,
+    currentStep,
+    setCurrentStep,
+    setLastSubmission,
+  } = useApplication();
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -59,15 +64,11 @@ function Application() {
 
     setSubmitting(true);
     setSubmitError("");
+
     try {
-      const payload = {
-        ...formData,
-        status: "Pending",
-        submittedAt: new Date().toISOString(),
-      };
-      const created = await createApplication(payload);
+      const created = await createApplication(formData);
+
       setLastSubmission(created);
-      window.localStorage.setItem("applynow_last_application_id", created.id);
       navigate("/confirmation");
     } catch (error) {
       setSubmitError(error.message);
@@ -94,22 +95,42 @@ function Application() {
 
       <div className="rounded-lg border border-navy-800/10 bg-white/60 p-6 shadow-stub sm:p-8">
         {sectionKey === "personal" && (
-          <PersonalForm data={formData.personal} errors={errors} onChange={handleChange} />
+          <PersonalForm
+            data={formData.personal}
+            errors={errors}
+            onChange={handleChange}
+          />
         )}
         {sectionKey === "academic" && (
-          <AcademicForm data={formData.academic} errors={errors} onChange={handleChange} />
+          <AcademicForm
+            data={formData.academic}
+            errors={errors}
+            onChange={handleChange}
+          />
         )}
         {sectionKey === "guardian" && (
-          <GuardianForm data={formData.guardian} errors={errors} onChange={handleChange} />
+          <GuardianForm
+            data={formData.guardian}
+            errors={errors}
+            onChange={handleChange}
+          />
         )}
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <Button variant="ghost" onClick={handleBack} disabled={currentStep === 0}>
+        <Button
+          variant="ghost"
+          onClick={handleBack}
+          disabled={currentStep === 0}
+        >
           Back
         </Button>
         <Button variant="gold" onClick={handleNext} disabled={submitting}>
-          {submitting ? "Submitting..." : isLastStep ? "Submit Application" : "Next"}
+          {submitting
+            ? "Submitting..."
+            : isLastStep
+              ? "Submit Application"
+              : "Next"}
         </Button>
       </div>
     </div>

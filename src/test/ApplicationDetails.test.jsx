@@ -171,7 +171,7 @@ describe("ApplicationDetails", () => {
 
     expect(screen.getByRole("button", { name: "Approve" })).toBeDisabled();
 
-    expect(screen.getByRole("button", { name: "Reject" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "Reject" })).toBeDisabled();
   });
 
   it("displays an error when updating the application status fails", async () => {
