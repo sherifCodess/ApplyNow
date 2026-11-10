@@ -197,7 +197,7 @@ authRouter.post(
       res.cookie("applynow.sid", session.token, {
         httpOnly: true,
         secure: env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         expires: session.expiresAt,
       });
@@ -263,7 +263,7 @@ authRouter.post("/logout", requireAuthentication, async (req, res, next) => {
     res.clearCookie("applynow.sid", {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
     });
 
