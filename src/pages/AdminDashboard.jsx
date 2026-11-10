@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { Loader, ErrorBanner, EmptyState } from "../components/Feedback.jsx";
@@ -12,27 +12,23 @@ function AdminDashboard() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("All");
 
-  async function loadApplications() {
+  const loadApplications = useCallback(async () => {
     setLoading(true);
     setError("");
+
     try {
-      const data = await getApplications();
+      const data = await getApplications(filter);
       setApplications(data);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter]);
 
   useEffect(() => {
     loadApplications();
-  }, []);
-
-  const visible =
-    filter === "All"
-      ? applications
-      : applications.filter((app) => app.status === filter);
+  }, [loadApplications]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
@@ -41,6 +37,7 @@ function AdminDashboard() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-navy-800/50">
             Admissions Office
           </p>
+
           <h1 className="mt-2 font-display text-3xl font-semibold text-navy-800">
             Applications
           </h1>
@@ -50,7 +47,9 @@ function AdminDashboard() {
           {FILTERS.map((label) => (
             <button
               key={label}
+              type="button"
               onClick={() => setFilter(label)}
+              aria-pressed={filter === label}
               className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
                 filter === label
                   ? "border-navy-800 bg-navy-800 text-paper"
@@ -68,7 +67,7 @@ function AdminDashboard() {
 
         {loading ? (
           <Loader label="Loading applications..." />
-        ) : visible.length === 0 ? (
+        ) : applications.length === 0 ? (
           <EmptyState
             title="No applications here"
             description="Nothing matches this filter yet."
@@ -89,8 +88,9 @@ function AdminDashboard() {
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
+
               <tbody>
-                {visible.map((app) => (
+                {applications.map((app) => (
                   <tr
                     key={app.id}
                     className="border-b border-navy-800/5 last:border-0 hover:bg-navy-800/5"
@@ -99,21 +99,25 @@ function AdminDashboard() {
                       <p className="font-medium text-navy-800">
                         {app.personal?.firstName} {app.personal?.lastName}
                       </p>
-                      <p className="font-mono text-xs text-navy-800/40">
-                        APP-{String(app.id).padStart(3, "0")}
+                      <p className="break-all font-mono text-xs text-navy-800/40">
+                        {app.id}
                       </p>
                     </td>
+
                     <td className="hidden px-4 py-3 text-navy-800/70 sm:table-cell">
                       {app.academic?.programme}
                     </td>
+
                     <td className="hidden px-4 py-3 text-navy-800/50 md:table-cell">
                       {app.submittedAt
                         ? new Date(app.submittedAt).toLocaleDateString()
                         : "—"}
                     </td>
+
                     <td className="px-4 py-3">
                       <StatusBadge status={app.status} />
                     </td>
+
                     <td className="px-4 py-3 text-right">
                       <Link
                         to={`/admin/applications/${app.id}`}

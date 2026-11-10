@@ -7,8 +7,28 @@ import { loginSchema } from "./login-schema.js";
 import { loginStudent, InvalidCredentialsError } from "./login.js";
 import { requireAuthentication } from "./auth.middleware.js";
 import { revokeSession } from "./session.js";
+import { z } from "zod";
+import { rateLimit } from "express-rate-limit";
+import { prisma } from "../../lib/prisma.js";
+import { sendVerificationEmail } from "./verification-email.js";
+import {
+  issueEmailVerificationToken,
+  verifyEmailVerificationToken,
+} from "./email-verification.js";
 
 const authRouter = Router();
+
+const emailVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later.",
+    data: null,
+  },
+});
 
 authRouter.post(
   "/register",
@@ -25,12 +45,130 @@ authRouter.post(
     }
 
     try {
-      await registerStudent(validation.data);
+      const result = await registerStudent(validation.data);
+
+      if (result.verificationToken) {
+        try {
+          await sendVerificationEmail(
+            validation.data.email,
+            result.verificationToken,
+          );
+        } catch {
+          console.error("ApplyNow verification email delivery failed.");
+        }
+      }
 
       res.status(202).json({
         success: true,
         message:
-          "Registration accepted. Email verification delivery is not configured yet.",
+          "If the address is eligible, verification instructions will be sent shortly.",
+        data: null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+authRouter.post(
+  "/verify-email",
+  emailVerificationLimiter,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const validation = z
+      .object({
+        token: z.string().regex(/^[a-f0-9]{64}$/i),
+      })
+      .safeParse(req.body);
+
+    if (!validation.success) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification link.",
+        data: null,
+      });
+      return;
+    }
+
+    try {
+      const verified = await verifyEmailVerificationToken(
+        validation.data.token,
+      );
+
+      if (!verified) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid or expired verification link.",
+          data: null,
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Email address verified successfully.",
+        data: null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+const verificationResendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 3,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later.",
+    data: null,
+  },
+});
+
+const resendVerificationSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+});
+
+authRouter.post(
+  "/verification/resend",
+  verificationResendLimiter,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const validation = resendVerificationSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid email address.",
+        data: null,
+      });
+      return;
+    }
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: { emailNormalized: validation.data.email },
+        select: {
+          id: true,
+          email: true,
+          emailVerifiedAt: true,
+        },
+      });
+
+      if (user && !user.emailVerifiedAt) {
+        const verification = await issueEmailVerificationToken(user.id);
+
+        try {
+          await sendVerificationEmail(user.email, verification.token);
+        } catch {
+          console.error("ApplyNow verification email delivery failed.");
+        }
+      }
+
+      res.status(202).json({
+        success: true,
+        message:
+          "If the address is eligible, verification instructions will be sent shortly.",
         data: null,
       });
     } catch (error) {

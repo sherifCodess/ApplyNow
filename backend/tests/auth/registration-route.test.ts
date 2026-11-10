@@ -1,10 +1,20 @@
 // @vitest-environment node
 
 import { randomUUID } from "node:crypto";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import app from "../../src/app.js";
 import { prisma } from "../../src/lib/prisma.js";
+
+vi.mock("../../src/modules/auth/verification-email.js", () => ({
+  sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
+import { sendVerificationEmail } from "../../src/modules/auth/verification-email.js";
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 const createdUserIds: string[] = [];
 
@@ -29,7 +39,7 @@ describe("POST /api/v1/auth/register", () => {
     expect(response.body).toEqual({
       success: true,
       message:
-        "Registration accepted. Email verification delivery is not configured yet.",
+        "If the address is eligible, verification instructions will be sent shortly.",
       data: null,
     });
 
@@ -45,6 +55,11 @@ describe("POST /api/v1/auth/register", () => {
       expect(user.role).toBe("STUDENT");
       expect(user.emailVerifiedAt).toBeNull();
     }
+
+    expect(sendVerificationEmail).toHaveBeenCalledWith(
+      email,
+      expect.stringMatching(/^[a-f0-9]{64}$/),
+    );
   });
 
   it("rejects invalid registration details", async () => {
@@ -88,5 +103,6 @@ describe("POST /api/v1/auth/register", () => {
 
     expect(duplicateResponse.status).toBe(firstResponse.status);
     expect(duplicateResponse.body).toEqual(firstResponse.body);
+    expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
   });
 });

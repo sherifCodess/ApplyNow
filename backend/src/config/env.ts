@@ -11,6 +11,10 @@ const envSchema = z.object({
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(100),
 
   DATABASE_URL: z.string().url(),
+
+  SENDBYTE_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().optional(),
+  APP_BASE_URL: z.string().url().default("http://localhost:5173"),
 });
 
 const result = envSchema.safeParse(process.env);

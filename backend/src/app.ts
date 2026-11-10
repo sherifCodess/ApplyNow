@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import { env } from "./config/env.js";
 import authRouter from "./modules/auth/auth.routes.js";
+import applicationRouter from "./modules/applications/application.routes.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use(
 
 app.use(express.json({ limit: "1mb" }));
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/applications", applicationRouter);
 
 app.get("/api/v1/health", (_req, res) => {
   res.status(200).json({
