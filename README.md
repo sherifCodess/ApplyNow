@@ -1,293 +1,176 @@
-# ApplyNow — Full-Stack Admissions Portal
+# ApplyNow — Full-Stack Admissions Management System
 
-ApplyNow is a full-stack admissions portal that allows students to register, submit admission applications, and track their application status. Admissions administrators can review submitted applications and approve or reject them.
+ApplyNow is a full-stack admissions management platform designed to streamline student applications and administrative admissions workflows.
 
-The project combines a React frontend with a TypeScript/Express backend, PostgreSQL database, and Prisma ORM.
+Students can register, authenticate, complete the email verification workflow, submit admission applications, and track their application statuses. Admissions administrators can access submitted applications, review applicant information, and manage application decisions through an administrative dashboard.
+
+Built with React, Node.js, Express 5, TypeScript, PostgreSQL, and Prisma ORM, ApplyNow demonstrates practical software engineering through modular backend architecture, secure session-based authentication, role-based authorization, relational database management, request validation, security middleware, and automated testing.
 
 ## Project Links
 
-- **Frontend deployment:** https://apply-now-three.vercel.app
-- **GitHub repository:** https://github.com/sherifCodess/ApplyNow
+- **Live Application:** https://apply-now-three.vercel.app
+- **Backend API:** https://applynow-ovx3.onrender.com
+- **Backend Health Check:** https://applynow-ovx3.onrender.com/api/v1/health
+- **GitHub Repository:** https://github.com/sherifCodess/ApplyNow
 
-The deployment link refers to the frontend. A working production deployment is underway.
+## Production Deployment
 
-## Features
+The application is deployed using the following infrastructure:
 
-### Student
+| Component   | Technology                   | Hosting |
+| ----------- | ---------------------------- | ------- |
+| Frontend    | React, Vite                  | Vercel  |
+| Backend API | Node.js, Express, TypeScript | Render  |
+| Database    | PostgreSQL                   | Neon    |
 
-- Student registration and sign-in
-- Password hashing with Argon2
-- Email verification workflow
-- Server-managed authentication sessions
-- HTTP-only session cookies
-- Multi-step application form:
-  - Personal Information
-  - Academic Information
-  - Guardian Information
-- Client-side and server-side input validation
-- Application submission and confirmation
-- Application status tracking
-- Protected student routes
+The frontend communicates with the backend through a versioned REST API.
+
+## Key Features
+
+### Student Features
+
+- Student registration and login.
+- Secure password hashing using Argon2.
+- Email verification workflow.
+- Server-managed authentication sessions.
+- HTTP-only session cookies.
+- Multi-step admission application form.
+- Personal, academic, and guardian information collection.
+- Client-side and server-side validation.
+- Application submission and confirmation.
+- Application status tracking.
+- Protected student routes.
 
 ### Admissions Administration
 
-- Protected administrative routes
-- Application dashboard
-- Application filtering by status
-- Application details and review
-- Approve and reject actions
+- Role-protected administrative access.
+- Administrative application dashboard.
+- Application filtering by status.
+- Application details and review.
+- Application approval and rejection.
+- Protected administrative operations.
 
-### Engineering and Security
+### Application Business Rules
 
-- REST API organized into authentication and application modules
-- PostgreSQL persistence
-- Prisma ORM and database migrations
-- Zod request validation
-- Helmet security headers
-- CORS configuration
-- API rate limiting
-- Centralized API error handling
-- Automated frontend and backend tests
+ApplyNow enforces application eligibility rules to manage subsequent submissions:
+
+- Students cannot submit another application while their previous application is awaiting a final administrative decision.
+- Students can submit another application after their previous application has been approved.
+- Students can reapply after their previous application has been rejected.
+
+These rules are enforced through backend application logic and database constraints.
 
 ## Technology Stack
 
-| Area              | Technologies                               |
+| Category          | Technologies                               |
 | ----------------- | ------------------------------------------ |
-| Frontend          | React, Vite, Tailwind CSS                  |
+| Frontend          | React 18, Vite, Tailwind CSS               |
+| Languages         | JavaScript, TypeScript                     |
 | Routing           | React Router                               |
-| State management  | React Context API                          |
-| HTTP client       | Axios                                      |
-| Backend           | Node.js, Express 5, TypeScript             |
+| State Management  | React Context API                          |
+| HTTP Client       | Axios                                      |
+| Backend Runtime   | Node.js                                    |
+| Backend Framework | Express 5                                  |
 | Database          | PostgreSQL                                 |
-| ORM               | Prisma                                     |
+| ORM               | Prisma 7                                   |
 | Validation        | Zod                                        |
-| Password security | Argon2                                     |
+| Password Security | Argon2                                     |
 | Authentication    | Server-managed sessions, HTTP-only cookies |
-| Email             | SendByte                                   |
+| Email Integration | SendByte                                   |
+| Security          | Helmet, CORS, express-rate-limit           |
 | Testing           | Vitest, React Testing Library, Supertest   |
+| Development Tools | Git, GitHub                                |
 
-## Architecture
+## System Architecture
 
-```text
-                React Frontend
-                 (Vite :5173)
-                      |
-                 Axios API Client
-                      |
-                /api/v1 requests
-                      |
-               Express API Server
-                 (Port 5000)
-                      |
-          +-----------+-----------+
-          |                       |
-    Authentication           Applications
-       Module                   Module
-          |                       |
-          +-----------+-----------+
-                      |
-                Prisma ORM
-                      |
-                PostgreSQL
-```
-
-The frontend communicates with the backend through the `/api/v1` API prefix. During local development, Vite proxies these requests to the Express server.
-
-The backend handles authentication, authorization, request validation, application workflows, and database operations.
-
-## Application Routes
-
-| Route                     | Purpose                                  |
-| ------------------------- | ---------------------------------------- |
-| `/`                       | Admissions landing page                  |
-| `/register`               | Student registration                     |
-| `/login`                  | Student and administrator sign-in        |
-| `/verify-email`           | Email verification                       |
-| `/apply`                  | Multi-step application                   |
-| `/confirmation`           | Application submission confirmation      |
-| `/dashboard`              | Student dashboard and application status |
-| `/admin`                  | Admissions administration dashboard      |
-| `/admin/applications/:id` | Application details and review           |
-
-## API Structure
-
-The backend API uses the `/api/v1` prefix.
-
-| API prefix             | Responsibility                                                         |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `/api/v1/auth`         | Registration, login, email verification, session and logout operations |
-| `/api/v1/applications` | Application submission, retrieval and administration workflows         |
-| `/api/v1/health`       | API health check                                                       |
-
-The API uses JSON request and response bodies. Authentication is maintained through server-managed sessions rather than client-managed authentication tokens.
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js and npm
-- PostgreSQL
-- Git
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/sherifCodess/ApplyNow.git
-cd ApplyNow
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure environment variables
-
-Create a local environment file from the example:
-
-```bash
-cp .env.example .env
-```
-
-Configure the variables in `.env`:
-
-| Variable                  | Purpose                                         |
-| ------------------------- | ----------------------------------------------- |
-| `NODE_ENV`                | Backend environment                             |
-| `PORT`                    | Backend server port                             |
-| `CORS_ORIGIN`             | Allowed frontend origin                         |
-| `RATE_LIMIT_WINDOW_MS`    | Rate-limiting time window                       |
-| `RATE_LIMIT_MAX_REQUESTS` | Maximum requests within the configured window   |
-| `DATABASE_URL`            | PostgreSQL runtime connection                   |
-| `MIGRATION_DATABASE_URL`  | PostgreSQL connection used by Prisma migrations |
-| `SENDBYTE_API_KEY`        | SendByte API key                                |
-| `EMAIL_FROM`              | Verified sender email address                   |
-| `APP_BASE_URL`            | Frontend base URL used in verification links    |
-
-For local development, configure the frontend origin as `http://localhost:5173` and the application base URL accordingly.
-
-Both database connection variables must point to the intended PostgreSQL database. Keep actual credentials and API keys in `.env`; never commit this file.
-
-### 4. Generate the Prisma client
-
-```bash
-npm run db:generate
-```
-
-### 5. Apply database migrations
-
-After configuring PostgreSQL and the migration connection:
-
-```bash
-npm run db:migrate
-```
-
-Check migration status:
-
-```bash
-npm run db:status
-```
-
-Check database connectivity:
-
-```bash
-npm run db:check
-```
-
-### 6. Start the backend
-
-In one terminal:
-
-```bash
-npm run server:dev
-```
-
-### 7. Start the frontend
-
-In another terminal:
-
-```bash
-npm run dev
-```
-
-Open:
+ApplyNow follows a modular full-stack architecture that separates frontend presentation, backend application logic, authentication, and database operations.
 
 ```text
-http://localhost:5173
+             React Frontend
+                (Vite)
+                  |
+                  |
+             Axios API Client
+                  |
+                  |
+             /api/v1 requests
+                  |
+                  |
+             Express API
+             (Port 5000)
+                  |
+          +-------+-------+
+          |               |
+     Authentication   Applications
+        Module           Module
+          |               |
+     Auth Middleware  Application Services
+          |               |
+          +-------+-------+
+                  |
+                Prisma
+                  |
+              PostgreSQL
 ```
 
-The backend API runs on port `5000` in the local Vite proxy configuration.
+The backend is organized into dedicated modules, with separate responsibilities for routing, business logic, validation, authentication, and database access.
 
-## Available Scripts
+## Authentication and Security
 
-| Command                    | Description                                |
-| -------------------------- | ------------------------------------------ |
-| `npm run dev`              | Start the Vite frontend development server |
-| `npm run build`            | Build the frontend for production          |
-| `npm run preview`          | Preview the production frontend build      |
-| `npm run server:dev`       | Start the backend in development mode      |
-| `npm run server:build`     | Compile the backend TypeScript             |
-| `npm run server:typecheck` | Run backend TypeScript checks              |
-| `npm run server:start`     | Start the compiled backend                 |
-| `npm run server:test`      | Run the backend application test           |
-| `npm run db:generate`      | Generate the Prisma client                 |
-| `npm run db:migrate`       | Apply development database migrations      |
-| `npm run db:check`         | Check database connectivity                |
-| `npm run db:status`        | Check migration status                     |
-| `npm test`                 | Start Vitest                               |
+ApplyNow uses server-managed sessions rather than client-managed JWT authentication.
 
-## Testing
+The authentication system includes:
 
-The project uses Vitest for automated testing, React Testing Library for frontend component tests, and Supertest for backend HTTP tests.
+- Student registration and login.
+- Argon2 password hashing.
+- Email verification tokens.
+- Session creation and validation.
+- HTTP-only session cookies.
+- Session expiration and logout.
+- Authentication middleware.
+- Role-based authorization.
 
-Run all tests:
+The application defines three user roles:
 
-```bash
-npx vitest run
-```
+- `STUDENT`
+- `ADMISSIONS_ADMIN`
+- `SUPER_ADMIN`
 
-Run backend tests:
+Additional security measures include:
 
-```bash
-npx vitest run backend/tests
-```
+- Protected API endpoints.
+- Helmet security headers.
+- CORS configuration.
+- API rate limiting.
+- Server-side request validation.
+- Centralized error handling.
 
-The test suite covers authentication, registration, sessions, email verification, application workflows, form validation, dashboards, and application review.
+## API Overview
 
-## Production Builds
+All backend endpoints use the `/api/v1` prefix.
 
-Build the frontend:
+| API Module             | Responsibility                                                  |
+| ---------------------- | --------------------------------------------------------------- |
+| `/api/v1/auth`         | Registration, login, email verification, sessions, and logout   |
+| `/api/v1/applications` | Application submission, retrieval, and administrative workflows |
+| `/api/v1/health`       | API health monitoring                                           |
 
-```bash
-npm run build
-```
+The API uses JSON request and response bodies. Authentication is maintained through server-managed sessions.
 
-Frontend build output is generated in `dist/`.
+## Database and Data Management
 
-Compile the backend:
+ApplyNow uses PostgreSQL for persistent relational data storage and Prisma ORM for database access.
 
-```bash
-npm run server:build
-```
+Database management includes:
 
-Backend build output is generated in `dist-server/`.
+- Prisma schema definition.
+- Version-controlled database migrations.
+- Prisma Client generation.
+- Runtime database connectivity checks.
+- Migration status verification.
+- Database-level application eligibility constraints.
 
-Before deployment, configure production environment variables, database access, CORS origins, secure cookie settings, email delivery, and the backend hosting environment.
-
-## Email Verification Configuration
-
-ApplyNow includes an email verification workflow using SendByte.
-
-Actual verification email delivery requires:
-
-- A configured SendByte account
-- A valid API key
-- A verified sending domain
-- A valid sender address configured through `EMAIL_FROM`
-- The correct frontend URL configured through `APP_BASE_URL`
-
-Email delivery is not operational until these requirements are configured. Registration and verification logic should not be mistaken for proof that email delivery is enabled.
+The data model includes user accounts, authentication sessions, email verification tokens, and admission applications.
 
 ## Project Structure
 
@@ -304,6 +187,8 @@ ApplyNow/
 │   │   ├── app.ts
 │   │   └── server.ts
 │   └── tests/
+│       ├── app.test.ts
+│       └── auth/
 ├── prisma/
 │   ├── migrations/
 │   └── schema.prisma
@@ -323,6 +208,181 @@ ApplyNow/
 └── README.md
 ```
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm
+- PostgreSQL
+- Git
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sherifCodess/ApplyNow.git
+
+cd ApplyNow
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Configure the following variables:
+
+| Variable                  | Purpose                                       |
+| ------------------------- | --------------------------------------------- |
+| `NODE_ENV`                | Backend environment                           |
+| `PORT`                    | Backend server port                           |
+| `CORS_ORIGIN`             | Allowed frontend origin                       |
+| `RATE_LIMIT_WINDOW_MS`    | Rate-limiting time window                     |
+| `RATE_LIMIT_MAX_REQUESTS` | Maximum requests within the configured window |
+| `DATABASE_URL`            | PostgreSQL runtime connection                 |
+| `MIGRATION_DATABASE_URL`  | PostgreSQL migration connection               |
+| `SENDBYTE_API_KEY`        | SendByte API key                              |
+| `EMAIL_FROM`              | Verified sender email address                 |
+| `APP_BASE_URL`            | Frontend URL used in verification links       |
+
+For local development, configure:
+
+```env
+NODE_ENV=development
+PORT=5000
+CORS_ORIGIN=http://localhost:5173
+APP_BASE_URL=http://localhost:5173
+```
+
+Configure your PostgreSQL connection strings and other required values in `.env`.
+
+Never commit actual credentials, database passwords, or API keys.
+
+### 4. Generate Prisma Client
+
+```bash
+npm run db:generate
+```
+
+### 5. Apply database migrations
+
+```bash
+npm run db:migrate
+```
+
+Check migration status:
+
+```bash
+npm run db:status
+```
+
+Check database connectivity:
+
+```bash
+npm run db:check
+```
+
+### 6. Start the backend
+
+```bash
+npm run server:dev
+```
+
+The backend runs on port `5000` by default.
+
+### 7. Start the frontend
+
+Open another terminal:
+
+```bash
+npm run dev
+```
+
+Open the application:
+
+http://localhost:5173
+
+## Available Scripts
+
+| Command                    | Description                       |
+| -------------------------- | --------------------------------- |
+| `npm run dev`              | Start frontend development server |
+| `npm run build`            | Build frontend for production     |
+| `npm run preview`          | Preview frontend production build |
+| `npm run server:dev`       | Start backend in development mode |
+| `npm run server:build`     | Compile backend TypeScript        |
+| `npm run server:typecheck` | Run backend type checking         |
+| `npm run server:start`     | Start compiled backend            |
+| `npm run server:test`      | Run backend application test      |
+| `npm run db:generate`      | Generate Prisma Client            |
+| `npm run db:migrate`       | Apply development migrations      |
+| `npm run db:check`         | Check database connectivity       |
+| `npm run db:status`        | Check migration status            |
+| `npx vitest run`           | Run all automated tests           |
+
+## Testing
+
+ApplyNow uses:
+
+- **Vitest** for automated testing.
+- **React Testing Library** for frontend component testing.
+- **Supertest** for backend HTTP testing.
+
+Run the complete test suite:
+
+```bash
+npx vitest run
+```
+
+Run backend tests:
+
+```bash
+npx vitest run backend/tests
+```
+
+Run frontend tests:
+
+```bash
+npx vitest run src/test
+```
+
+Run backend type checking:
+
+```bash
+npm run server:typecheck
+```
+
+The automated tests cover frontend application workflows, form validation, authentication, registration, password handling, sessions, email verification, and authorization middleware.
+
+## Email Verification Configuration
+
+ApplyNow includes an email verification workflow with SendByte integration.
+
+The verification logic and email integration are implemented, but production email delivery requires external provider configuration.
+
+To enable delivery, configure:
+
+- A SendByte account.
+- A valid `SENDBYTE_API_KEY`.
+- A verified sending domain.
+- A configured `EMAIL_FROM` sender address.
+- The correct `APP_BASE_URL`.
+
+Actual email delivery depends on successful provider configuration.
+
 ## Project Purpose
 
-ApplyNow demonstrates full-stack software engineering practices through a practical admissions workflow. It brings together frontend development, REST API design, authentication, authorization, relational database management, validation, security controls, automated testing, and application lifecycle management.
+ApplyNow demonstrates practical full-stack software engineering through the development of an admissions management platform.
+
+It brings together frontend development, backend architecture, REST API design, authentication, authorization, relational database management, security controls, business logic, and automated testing.
+
+The project reflects the engineering considerations involved in designing, implementing, and maintaining a full-stack web application.
