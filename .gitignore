@@ -9,3 +9,4 @@ backend/src/generated/
 
 # Test coverage
 coverage/
+db.json
