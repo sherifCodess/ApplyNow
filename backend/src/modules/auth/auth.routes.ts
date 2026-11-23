@@ -18,6 +18,30 @@ import {
 
 const authRouter = Router();
 
+const logEmailDeliveryError = (error: unknown): void => {
+  if (error instanceof Error) {
+    const smtpError = error as Error & {
+      code?: string;
+      command?: string;
+      responseCode?: number;
+    };
+
+    console.error("ApplyNow verification email delivery failed.", {
+      name: smtpError.name,
+      message: smtpError.message,
+      code: smtpError.code,
+      command: smtpError.command,
+      responseCode: smtpError.responseCode,
+    });
+
+    return;
+  }
+
+  console.error("ApplyNow verification email delivery failed.", {
+    message: "Unknown email delivery error.",
+  });
+};
+
 const emailVerificationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
@@ -53,8 +77,8 @@ authRouter.post(
             validation.data.email,
             result.verificationToken,
           );
-        } catch {
-          console.error("ApplyNow verification email delivery failed.");
+        } catch (error) {
+          logEmailDeliveryError(error);
         }
       }
 
@@ -160,8 +184,8 @@ authRouter.post(
 
         try {
           await sendVerificationEmail(user.email, verification.token);
-        } catch {
-          console.error("ApplyNow verification email delivery failed.");
+        } catch (error) {
+          logEmailDeliveryError(error);
         }
       }
 
