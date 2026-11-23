@@ -12,9 +12,36 @@ const envSchema = z.object({
 
   DATABASE_URL: z.string().url(),
 
+  EMAIL_PROVIDER: z.enum(["sendbyte", "gmail"]).default("sendbyte"),
+
   SENDBYTE_API_KEY: z.string().optional(),
+
+  GMAIL_USER: z.string().optional(),
+  GMAIL_APP_PASSWORD: z.string().optional(),
+
   EMAIL_FROM: z.string().optional(),
   APP_BASE_URL: z.string().url().default("http://localhost:5173"),
+}).superRefine((config, ctx) => {
+  if (config.EMAIL_PROVIDER === "gmail") {
+    if (
+      !config.GMAIL_USER ||
+      !z.email().safeParse(config.GMAIL_USER).success
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["GMAIL_USER"],
+        message: "A valid Gmail address is required when Gmail is selected.",
+      });
+    }
+
+    if (!config.GMAIL_APP_PASSWORD?.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["GMAIL_APP_PASSWORD"],
+        message: "A Gmail App Password is required when Gmail is selected.",
+      });
+    }
+  }
 });
 
 const result = envSchema.safeParse(process.env);
